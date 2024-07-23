@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAreaDto } from './dto/create-area.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaginationAndFilterDto } from 'src/common/dto/paginationAndFilter.dto';
@@ -50,6 +50,16 @@ export class AreaService {
     };
   }
 
+  public async findOne(id: string) {
+    const area = await this.prismaService.area.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    return area;
+  }
+
   public async create(createAreaDto: CreateAreaDto) {
     const area = await this.prismaService.area.create({
       data: createAreaDto,
@@ -59,6 +69,12 @@ export class AreaService {
   }
 
   public async update(id: string, updateAreaDto: UpdateAreaDto) {
+    const areaExist = await this.findOne(id);
+
+    if (!areaExist) {
+      throw new NotFoundException(`Área con id ${id} no encontrada`);
+    }
+
     const area = await this.prismaService.area.update({
       where: {
         id,
