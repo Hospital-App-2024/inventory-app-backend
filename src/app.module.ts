@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AreaModule } from './area/area.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { WorkerModule } from './worker/worker.module';
+import { ResourceModule } from './resource/resource.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
-  imports: [PrismaModule, AreaModule, WorkerModule],
+  imports: [PrismaModule, ResourceModule, ProductModule],
   controllers: [],
   providers: [],
 })

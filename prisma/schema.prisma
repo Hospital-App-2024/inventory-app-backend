@@ -13,19 +13,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Area {
-  id        String   @id @default(uuid())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Worker    Worker[]
+enum ResourceTypes {
+  AREA
+  WORKER
 }
 
-model Worker {
-  id        String   @id @default(uuid())
-  name      String
-  areaId    String
-  area      Area     @relation(fields: [areaId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Resource {
+  id      String        @id @default(uuid())
+  name    String
+  type    ResourceTypes
+  Product Product[]
+}
+
+enum ProductStatus {
+  GOOD
+  BAD
+  DISCONTINUED
+  TRANSFERRED
+}
+
+model Product {
+  id         String        @id @default(uuid())
+  name       String
+  quantity   Int
+  status     ProductStatus
+  resource   Resource      @relation(fields: [resourceId], references: [id])
+  resourceId String
+  image      String
 }
