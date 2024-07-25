@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -23,7 +24,7 @@ export class ProductController {
   public constructor(private readonly productService: ProductService) {}
 
   @Get()
-  public findAll(paginationAndFilterDto: PaginationAndFilterDto) {
+  public findAll(@Query() paginationAndFilterDto: PaginationAndFilterDto) {
     return this.productService.findAll(paginationAndFilterDto);
   }
 

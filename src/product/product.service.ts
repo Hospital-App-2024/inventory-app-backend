@@ -4,12 +4,18 @@ import { createPagination } from 'src/common/helper/createPagination';
 import { PaginationAndFilterDto } from 'src/common/dto/paginationAndFilter.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { Folder } from 'src/common/helper/folder';
+import { ProductMapper } from './mapper/product.mapper';
 
 @Injectable()
 export class ProductService {
   private readonly logger = new Logger('ProductService');
 
-  public constructor(private readonly prismaService: PrismaService) {}
+  public constructor(
+    private readonly prismaService: PrismaService,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   public async findAll(paginationAndFilterDto: PaginationAndFilterDto) {
     const take = paginationAndFilterDto?.limit;
@@ -18,7 +24,7 @@ export class ProductService {
 
     const isPagination = take && page;
 
-    const [count, product] = await Promise.all([
+    const [count, products] = await Promise.all([
       this.prismaService.product.count({
         where: {
           name: {
@@ -30,6 +36,9 @@ export class ProductService {
       this.prismaService.product.findMany({
         take: isPagination && take,
         skip: isPagination && take * (page - 1),
+        include: {
+          resource: true,
+        },
         where: {
           name: {
             contains: search,
@@ -43,7 +52,10 @@ export class ProductService {
     ]);
 
     return {
-      data: product,
+      data: ProductMapper.mapToDtos({
+        products: products,
+        withResource: true,
+      }),
       meta: createPagination({
         page,
         take,
@@ -66,16 +78,19 @@ export class ProductService {
     createProductDto: CreateProductDto,
     file: Express.Multer.File,
   ) {
-    // const product = await this.prismaService.product.create({
-    //   data: createProductDto,
-    // });
-
-    // return product;
-
-    return {
-      createProductDto,
+    const { secure_url } = await this.cloudinaryService.uploadFile(
       file,
-    };
+      Folder.PRODUCTS,
+    );
+
+    const product = await this.prismaService.product.create({
+      data: {
+        ...createProductDto,
+        image: secure_url,
+      },
+    });
+
+    return ProductMapper.mapToDto(product);
   }
 
   public async update(id: string, updateProductDto: UpdateProductDto) {
@@ -92,6 +107,6 @@ export class ProductService {
       data: updateProductDto,
     });
 
-    return product;
+    return ProductMapper.mapToDto(product);
   }
 }

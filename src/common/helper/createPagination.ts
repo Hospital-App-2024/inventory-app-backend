@@ -8,6 +8,7 @@ export const createPagination = ({ page, take, count }: Props) => {
   const totalPages = Math.ceil(count / take) || 1;
 
   return {
+    count,
     totalPages: totalPages,
     currentPage: page || 1,
     nextPage: totalPages > page ? page + 1 : null,
