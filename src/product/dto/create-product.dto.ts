@@ -32,7 +32,14 @@ export class CreateProductDto {
   })
   status: ProductStatus;
   @IsUUID('4', {
-    message: 'Propiedad resourceId debe ser un UUID',
+    message: 'Propiedad ownerId debe ser un UUID',
   })
-  resourceId: string;
+  ownerId: string;
+  @IsString({
+    message: 'Propiedad inventoryNumber debe ser un string',
+  })
+  @MinLength(3, {
+    message: 'Propiedad inventoryNumber debe tener al menos 3 caracteres',
+  })
+  inventoryNumber: string;
 }

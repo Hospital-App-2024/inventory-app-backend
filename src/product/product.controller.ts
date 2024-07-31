@@ -41,18 +41,38 @@ export class ProductController {
           }),
           new FileTypeValidator({ fileType: 'image/*' }),
         ],
+        fileIsRequired: false,
       }),
     )
-    file: Express.Multer.File,
+    file?: Express.Multer.File,
   ) {
     return this.productService.create(createProductDto, file);
   }
 
+  @Get(':id')
+  public findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.productService.findOne(id);
+  }
+
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('file'))
   public update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({
+            maxSize: 1000 * 1024 * 5,
+            message: 'file debe ser menor a 5MB',
+          }),
+          new FileTypeValidator({ fileType: 'image/*' }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file?: Express.Multer.File,
   ) {
-    return this.productService.update(id, updateProductDto);
+    return this.productService.update(id, updateProductDto, file);
   }
 }

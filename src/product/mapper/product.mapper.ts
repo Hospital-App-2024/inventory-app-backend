@@ -1,13 +1,6 @@
-import { Resource } from '@prisma/client';
+import { Owner } from '@prisma/client';
 
-const Status = {
-  GOOD: 'Bueno',
-  BAD: 'Malo',
-  DISCONTINUED: 'Dado de baja',
-  TRANSFERRED: 'Traspasado',
-};
-
-const ResourceTypes = {
+const OwnerTypes = {
   AREA: 'Área',
   WORKER: 'Trabajador',
 };
@@ -17,14 +10,15 @@ export interface Product {
   name: string;
   quantity: number;
   status: string;
-  resourceId: string;
+  ownerId: string;
   image: string;
-  resource?: Resource;
+  inventoryNumber: string;
+  owner?: Owner;
 }
 
 interface Options {
   products: Product[];
-  withResource?: boolean;
+  withOwner?: boolean;
 }
 
 export class ProductMapper {
@@ -33,24 +27,22 @@ export class ProductMapper {
   public static mapToDto(product: Product) {
     return {
       ...product,
-      status: Status[product.status],
     };
   }
 
-  public static mapToProductWithResourceDto(product: Product) {
-    const { resource, ...rest } = product;
+  public static mapToProductWithOwnerDto(product: Product) {
+    const { owner, ...rest } = product;
 
     return {
       ...rest,
-      status: Status[rest.status],
-      resourceName: resource.name,
-      resourceType: ResourceTypes[resource.type],
+      ownerName: owner.name,
+      ownerType: OwnerTypes[owner.type],
     };
   }
 
-  public static mapToDtos({ products, withResource }: Options) {
-    return withResource
-      ? products.map((product) => this.mapToProductWithResourceDto(product))
+  public static mapToDtos({ products, withOwner }: Options) {
+    return withOwner
+      ? products.map((product) => this.mapToProductWithOwnerDto(product))
       : products.map((product) => this.mapToDto(product));
   }
 }

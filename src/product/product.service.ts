@@ -37,7 +37,7 @@ export class ProductService {
         take: isPagination && take,
         skip: isPagination && take * (page - 1),
         include: {
-          resource: true,
+          owner: true,
         },
         where: {
           name: {
@@ -46,7 +46,7 @@ export class ProductService {
           },
         },
         orderBy: {
-          name: 'desc',
+          createdAt: 'desc',
         },
       }),
     ]);
@@ -54,7 +54,7 @@ export class ProductService {
     return {
       data: ProductMapper.mapToDtos({
         products: products,
-        withResource: true,
+        withOwner: true,
       }),
       meta: createPagination({
         page,
@@ -76,12 +76,18 @@ export class ProductService {
 
   public async create(
     createProductDto: CreateProductDto,
-    file: Express.Multer.File,
+    file?: Express.Multer.File,
   ) {
-    const { secure_url } = await this.cloudinaryService.uploadFile(
-      file,
-      Folder.PRODUCTS,
-    );
+    let secure_url = null;
+
+    if (file) {
+      const image = await this.cloudinaryService.uploadFile(
+        file,
+        Folder.PRODUCTS,
+      );
+
+      secure_url = image.secure_url as string;
+    }
 
     const product = await this.prismaService.product.create({
       data: {
@@ -93,11 +99,37 @@ export class ProductService {
     return ProductMapper.mapToDto(product);
   }
 
-  public async update(id: string, updateProductDto: UpdateProductDto) {
+  public async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    file?: Express.Multer.File,
+  ) {
     const productExist = await this.findOne(id);
 
     if (!productExist) {
       throw new NotFoundException(`Área con id ${id} no encontrada`);
+    }
+
+    let secure_url = null;
+
+    if (file) {
+      if (productExist.image) {
+        const publicId = productExist.image.split('/').pop()?.split('.')[0];
+        const image = `${Folder.PRODUCTS}/${publicId}`;
+
+        await this.cloudinaryService.deleteFile(image);
+      }
+
+      const image = await this.cloudinaryService.uploadFile(
+        file,
+        Folder.PRODUCTS,
+      );
+
+      secure_url = image.secure_url as string;
+    }
+
+    if (secure_url) {
+      updateProductDto.image = secure_url;
     }
 
     const product = await this.prismaService.product.update({

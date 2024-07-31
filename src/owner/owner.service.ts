@@ -1,13 +1,13 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { createPagination } from 'src/common/helper/createPagination';
-import { CreateResourceDto } from './dto/create-resource.dto';
 import { PaginationAndFilterDto } from 'src/common/dto/paginationAndFilter.dto';
-import { UpdateResourceDto } from './dto/update-resource.dto';
+import { CreateOwnerDto } from './dto/create-owner.dto';
+import { UpdateOwnerDto } from './dto/update-owner.dto';
 
 @Injectable()
-export class ResourceService {
-  private readonly logger = new Logger('ResourceService');
+export class OwnerService {
+  private readonly logger = new Logger('OwnerService');
 
   public constructor(private readonly prismaService: PrismaService) {}
 
@@ -18,8 +18,8 @@ export class ResourceService {
 
     const isPagination = take && page;
 
-    const [count, resource] = await Promise.all([
-      this.prismaService.resource.count({
+    const [count, owner] = await Promise.all([
+      this.prismaService.owner.count({
         where: {
           name: {
             contains: search,
@@ -27,7 +27,7 @@ export class ResourceService {
           },
         },
       }),
-      this.prismaService.resource.findMany({
+      this.prismaService.owner.findMany({
         take: isPagination && take,
         skip: isPagination && take * (page - 1),
         where: {
@@ -43,7 +43,7 @@ export class ResourceService {
     ]);
 
     return {
-      data: resource,
+      data: owner,
       meta: createPagination({
         page,
         take,
@@ -53,37 +53,37 @@ export class ResourceService {
   }
 
   public async findOne(id: string) {
-    const resource = await this.prismaService.resource.findUnique({
+    const owner = await this.prismaService.owner.findUnique({
       where: {
         id,
       },
     });
 
-    return resource;
+    return owner;
   }
 
-  public async create(createResourceDto: CreateResourceDto) {
-    const resource = await this.prismaService.resource.create({
-      data: createResourceDto,
+  public async create(createOwnerDto: CreateOwnerDto) {
+    const owner = await this.prismaService.owner.create({
+      data: createOwnerDto,
     });
 
-    return resource;
+    return owner;
   }
 
-  public async update(id: string, updateResourceDto: UpdateResourceDto) {
-    const resourceExist = await this.findOne(id);
+  public async update(id: string, updateOwnerDto: UpdateOwnerDto) {
+    const ownerExist = await this.findOne(id);
 
-    if (!resourceExist) {
+    if (!ownerExist) {
       throw new NotFoundException(`Área con id ${id} no encontrada`);
     }
 
-    const resource = await this.prismaService.resource.update({
+    const owner = await this.prismaService.owner.update({
       where: {
         id,
       },
-      data: updateResourceDto,
+      data: updateOwnerDto,
     });
 
-    return resource;
+    return owner;
   }
 }

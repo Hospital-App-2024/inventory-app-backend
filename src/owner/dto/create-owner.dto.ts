@@ -1,7 +1,7 @@
-import { ResourceTypes } from '@prisma/client';
+import { OwnerType } from '@prisma/client';
 import { IsEnum, IsString, MaxLength, MinLength } from 'class-validator';
 
-export class CreateResourceDto {
+export class CreateOwnerDto {
   @IsString({
     message: 'Propiedad name debe ser un string',
   })
@@ -12,10 +12,10 @@ export class CreateResourceDto {
     message: 'Propiedad name debe tener como máximo 50 caracteres',
   })
   name: string;
-  @IsEnum(ResourceTypes, {
+  @IsEnum(OwnerType, {
     message: `Propiedad type debe ser uno de los siguientes valores: ${Object.values(
-      ResourceTypes,
+      OwnerType,
     ).join(', ')}`,
   })
-  type: ResourceTypes;
+  type: OwnerType;
 }

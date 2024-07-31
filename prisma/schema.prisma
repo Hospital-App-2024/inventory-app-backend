@@ -13,15 +13,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ResourceTypes {
+enum OwnerType {
   AREA
   WORKER
 }
 
-model Resource {
-  id      String        @id @default(uuid())
+model Owner {
+  id      String    @id @default(uuid())
   name    String
-  type    ResourceTypes
+  type    OwnerType
   Product Product[]
 }
 
@@ -33,11 +33,14 @@ enum ProductStatus {
 }
 
 model Product {
-  id         String        @id @default(uuid())
-  name       String
-  quantity   Int
-  status     ProductStatus
-  resource   Resource      @relation(fields: [resourceId], references: [id])
-  resourceId String
-  image      String
+  id              String        @id @default(uuid())
+  inventoryNumber String
+  name            String
+  quantity        Int
+  status          ProductStatus
+  owner           Owner         @relation(fields: [ownerId], references: [id])
+  ownerId         String
+  image           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
