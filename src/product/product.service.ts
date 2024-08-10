@@ -7,6 +7,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Folder } from 'src/common/helper/folder';
 import { ProductMapper } from './mapper/product.mapper';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductService {
@@ -21,17 +22,30 @@ export class ProductService {
     const take = paginationAndFilterDto?.limit;
     const page = paginationAndFilterDto?.page;
     const search = paginationAndFilterDto?.search;
+    // const productStatus = paginationAndFilterDto?.productStatus;
 
     const isPagination = take && page;
 
-    const [count, products] = await Promise.all([
-      this.prismaService.product.count({
-        where: {
+    const searchCondition: Prisma.ProductWhereInput = {
+      OR: [
+        {
           name: {
             contains: search,
             mode: 'insensitive',
           },
         },
+        {
+          inventoryNumber: {
+            contains: search,
+            mode: 'insensitive',
+          },
+        },
+      ],
+    };
+
+    const [count, products] = await Promise.all([
+      this.prismaService.product.count({
+        where: searchCondition,
       }),
       this.prismaService.product.findMany({
         take: isPagination && take,
@@ -39,12 +53,7 @@ export class ProductService {
         include: {
           owner: true,
         },
-        where: {
-          name: {
-            contains: search,
-            mode: 'insensitive',
-          },
-        },
+        where: searchCondition,
         orderBy: {
           createdAt: 'desc',
         },
