@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsPositive, IsString } from 'class-validator';
+import { ProductStatus } from '@prisma/client';
 
 export class PaginationAndFilterDto {
   @IsPositive({
@@ -21,4 +22,8 @@ export class PaginationAndFilterDto {
   })
   @IsOptional()
   search?: string;
+
+  @IsEnum(ProductStatus)
+  @IsOptional()
+  productStatus?: ProductStatus;
 }

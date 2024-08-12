@@ -22,30 +22,37 @@ export class ProductService {
     const take = paginationAndFilterDto?.limit;
     const page = paginationAndFilterDto?.page;
     const search = paginationAndFilterDto?.search;
-    // const productStatus = paginationAndFilterDto?.productStatus;
+    const productStatus = paginationAndFilterDto?.productStatus;
 
     const isPagination = take && page;
 
     const searchCondition: Prisma.ProductWhereInput = {
-      OR: [
+      AND: [
         {
-          name: {
-            contains: search,
-            mode: 'insensitive',
-          },
+          status: productStatus,
         },
         {
-          inventoryNumber: {
-            contains: search,
-            mode: 'insensitive',
-          },
+          OR: [
+            {
+              name: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+            {
+              inventoryNumber: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          ],
         },
       ],
     };
 
     const [count, products] = await Promise.all([
       this.prismaService.product.count({
-        where: searchCondition,
+        where: search || productStatus ? searchCondition : {},
       }),
       this.prismaService.product.findMany({
         take: isPagination && take,
@@ -53,7 +60,7 @@ export class ProductService {
         include: {
           owner: true,
         },
-        where: searchCondition,
+        where: search || productStatus ? searchCondition : {},
         orderBy: {
           createdAt: 'desc',
         },
