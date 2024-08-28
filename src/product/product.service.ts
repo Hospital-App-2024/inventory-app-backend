@@ -40,6 +40,14 @@ export class ProductService {
               },
             },
             {
+              owner: {
+                name: {
+                  contains: search,
+                  mode: 'insensitive',
+                },
+              },
+            },
+            {
               inventoryNumber: {
                 contains: search,
                 mode: 'insensitive',
