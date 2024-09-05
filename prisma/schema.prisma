@@ -24,10 +24,12 @@ enum OwnerType {
 }
 
 model Owner {
-  id      String    @id @default(uuid())
-  name    String
-  type    OwnerType
-  Product Product[]
+  id        String    @id @default(uuid())
+  name      String @unique
+  type      OwnerType
+  Product   Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 enum ProductStatus {

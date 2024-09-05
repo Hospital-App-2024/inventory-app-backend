@@ -30,6 +30,9 @@ export class OwnerService {
       this.prismaService.owner.findMany({
         take: isPagination && take,
         skip: isPagination && take * (page - 1),
+        include: {
+          Product: true
+        },
         where: {
           name: {
             contains: search,
@@ -81,7 +84,7 @@ export class OwnerService {
       where: {
         id,
       },
-      data: updateOwnerDto,
+      data: updateOwnerDto
     });
 
     return owner;

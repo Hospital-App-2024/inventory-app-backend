@@ -29,7 +29,7 @@ export class OwnerController {
 
   @Patch(':id')
   public update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateOwnerDto: UpdateOwnerDto,
   ) {
     return this.ownerService.update(id, updateOwnerDto);
