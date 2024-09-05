@@ -1,9 +1,10 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { createPagination } from 'src/common/helper/createPagination';
 import { PaginationAndFilterDto } from 'src/common/dto/paginationAndFilter.dto';
 import { CreateOwnerDto } from './dto/create-owner.dto';
 import { UpdateOwnerDto } from './dto/update-owner.dto';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class OwnerService {
@@ -66,11 +67,23 @@ export class OwnerService {
   }
 
   public async create(createOwnerDto: CreateOwnerDto) {
-    const owner = await this.prismaService.owner.create({
-      data: createOwnerDto,
-    });
+    try {
+      const owner = await this.prismaService.owner.create({
+        data: createOwnerDto,
+      });
+  
+      return owner;
+    } catch (error) {
+      if (error instanceof PrismaClientKnownRequestError) {
+        switch(error.code) {
+          case 'P2002':
+            throw new ConflictException("Nombre de propietario ya existe")
+        }
+      }
 
-    return owner;
+      throw new InternalServerErrorException("Error al crear un propietario")
+
+    }
   }
 
   public async update(id: string, updateOwnerDto: UpdateOwnerDto) {
