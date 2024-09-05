@@ -37,7 +37,7 @@ export class ProductController {
         validators: [
           new MaxFileSizeValidator({
             maxSize: 1000 * 1024 * 5,
-            message: 'file debe ser menor a 5MB',
+            message: 'El tamaño de la imagen no puede superar los 5MB',
           }),
           new FileTypeValidator({ fileType: 'image/*' }),
         ],
